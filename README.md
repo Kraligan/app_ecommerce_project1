@@ -21,7 +21,7 @@ Dans un autre terminal:
 python test.py
 ```
 
-## Routes principales
+## Routes principales (documentation complete de l'API dans swagger.yaml)
 
 - `POST /api/auth/register` : Inscription d'un nouvel utilisateur.
 - `POST /api/auth/login` : Connexion et génération de token JWT.
