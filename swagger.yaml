@@ -1,0 +1,243 @@
+openapi: 3.0.0
+info:
+  title: E-Commerce API
+  version: 1.0.0
+  description: API RESTful pour une application e-commerce
+servers:
+  - url: http://localhost:5000
+paths:
+  /api/auth/register:
+    post:
+      summary: Inscription d'un nouvel utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                age:
+                  type: integer
+                email:
+                  type: string
+                password:
+                  type: string
+                is_admin:
+                  type: boolean
+      responses:
+        '200':
+          description: Utilisateur créé
+        '409':
+          description: Utilisateur déjà inscrit
+        '500':
+          description: Erreur serveur
+
+  /api/auth/login:
+    post:
+      summary: Connexion d'un utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Token JWT généré
+        '401':
+          description: Identifiants incorrects ou utilisateur non trouvé
+
+  /api/produits:
+    get:
+      summary: Afficher le catalogue
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des produits
+        '401':
+          description: Catalogue vide
+    post:
+      summary: Ajouter un produit (admin uniquement)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id: { type: string }
+                name: { type: string }
+                description: { type: string }
+                price: { type: number }
+                stock: { type: integer }
+                category: { type: string }
+      responses:
+        '200':
+          description: Produit ajouté
+        '500':
+          description: Produit déjà existant ou erreur
+
+  /api/produits/{caracteristique}/{carac_value}:
+    get:
+      summary: Récupérer un produit spécifique
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: caracteristique
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: carac_value
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Détail du produit
+        '400':
+          description: Caractéristique invalide
+        '404':
+          description: Produit non trouvé
+
+  /api/produits/{id}:
+    put:
+      summary: Modifier un produit (admin uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                price: { type: number }
+                stock: { type: integer }
+                category: { type: string }
+      responses:
+        '200':
+          description: Produit mis à jour
+    delete:
+      summary: Supprimer un produit (admin uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Produit supprimé
+
+  /api/commandes:
+    post:
+      summary: Créer une commande
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                adress: { type: string }
+                products:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      product_id: { type: string }
+                      quantity: { type: integer }
+      responses:
+        '201':
+          description: Commande créée
+    get:
+      summary: Récupérer la liste des commandes
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des commandes
+
+  /api/commandes/{id}:
+    get:
+      summary: Récupérer une commande spécifique
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Détails de la commande
+    patch:
+      summary: Modifier le statut d'une commande (admin uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string }
+      responses:
+        '200':
+          description: Statut mis à jour
+
+  /api/commandes/{id}/lignes:
+    get:
+      summary: Voir les lignes d'une commande
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lignes de commande
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
